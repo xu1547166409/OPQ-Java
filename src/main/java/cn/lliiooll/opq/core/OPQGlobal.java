@@ -102,6 +102,11 @@ public class OPQGlobal {
         json.put("sendToType", 1);
         json.put("groupid", 0);
         json.put("atUser", 0);
+        json.put("picBase64Buf", "");
+        json.put("voiceBase64Buf", "");
+        json.put("picUrl", "");
+        json.put("voiceUrl", "");
+        json.put("fileMd5", "");
         json.put("sendMsgType", "TextMsg");
         final StringBuilder msg = new StringBuilder();
         message.forEach(m -> {
@@ -192,6 +197,11 @@ public class OPQGlobal {
         json.put("sendToType", 3);
         json.put("groupid", group.getId());
         json.put("atUser", 0);
+        json.put("picBase64Buf", "");
+        json.put("voiceBase64Buf", "");
+        json.put("picUrl", "");
+        json.put("voiceUrl", "");
+        json.put("fileMd5", "");
         json.put("sendMsgType", "TextMsg");
         final StringBuilder msg = new StringBuilder();
         message.forEach(m -> {
@@ -281,6 +291,11 @@ public class OPQGlobal {
         json.put("sendToType", 2);
         json.put("groupid", 0);
         json.put("atUser", 0);
+        json.put("fileMd5", "");
+        json.put("picBase64Buf", "");
+        json.put("voiceBase64Buf", "");
+        json.put("picUrl", "");
+        json.put("voiceUrl", "");
         json.put("sendMsgType", "TextMsg");
         final StringBuilder msg = new StringBuilder();
         final StringBuilder ats = new StringBuilder().append("[ATUSER(");
@@ -539,6 +554,11 @@ public class OPQGlobal {
         String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=SendMsg&timeout=10";
         json.put("groupid", 0);
         json.put("atUser", 0);
+        json.put("fileMd5", "");
+        json.put("picBase64Buf", "");
+        json.put("voiceBase64Buf", "");
+        json.put("picUrl", "");
+        json.put("voiceUrl", "");
         json.put("sendMsgType", "ReplayMsg");
         if (message.getSender() instanceof Member) {
             json.put("toUser", ((Member) message.getSender()).getFromGroup().getId());
@@ -558,22 +578,6 @@ public class OPQGlobal {
                 for (Long id : ((AtMessage) m).getId()) {
                     ats.append(Strings.isNullOrEmpty(ats.toString().replace("[ATUSER(", "")) ? id : "," + id);
                 }
-            } else if (m instanceof FlashPicMessage) {
-                if (json.containsKey("sendMsgType") && !(json.getString("sendMsgType").equalsIgnoreCase("VoiceMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("JsonMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("XmlMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("VideoMsg"))) {
-                    json.put("sendMsgType", "PicMsg");
-                    json.put("flashPic", true);
-                    FlashPicMessage picMessage = (FlashPicMessage) m;
-                    String u = picMessage.getUrl();
-                    if (!Strings.isNullOrEmpty(u)) {
-                        json.put("picUrl", u);
-                    } else {
-                        json.put("picBase64Buf", Base64.getEncoder().encode(picMessage.img));
-                        json.put("fileMd5", picMessage.md5);
-                    }
-                }
             } else if (m instanceof PicMessage) {
                 if (json.containsKey("sendMsgType") && !(json.getString("sendMsgType").equalsIgnoreCase("VoiceMsg") ||
                         json.getString("sendMsgType").equalsIgnoreCase("JsonMsg") ||
@@ -588,37 +592,6 @@ public class OPQGlobal {
                         json.put("picBase64Buf", Base64.getEncoder().encode(picMessage.img));
                         json.put("fileMd5", picMessage.md5);
                     }
-                }
-            } else if (m instanceof VoiceMessage) {
-                if (json.containsKey("sendMsgType") && !(json.getString("sendMsgType").equalsIgnoreCase("PicMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("JsonMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("XmlMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("VideoMsg"))) {
-                    json.put("sendMsgType", "VoiceMsg");
-                    String u = ((VoiceMessage) m).getUrl();
-                    if (!Strings.isNullOrEmpty(u)) {
-                        json.put("voiceUrl", u);
-                    } else {
-                        json.put("voiceBase64Buf", Base64.getEncoder().encode(((VoiceMessage) m).voice));
-                    }
-                }
-            } else if (m instanceof JsonMessage) {
-                if (json.containsKey("sendMsgType") && !(json.getString("sendMsgType").equalsIgnoreCase("VoiceMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("PicMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("XmlMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("VideoMsg"))) {
-                    json.put("sendMsgType", "JsonMsg");
-                    msg.append(((JsonMessage) m).getMsg());
-
-                }
-            } else if (m instanceof XmlMessage) {
-                if (json.containsKey("sendMsgType") && !(json.getString("sendMsgType").equalsIgnoreCase("VoiceMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("PicMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("JsonMsg") ||
-                        json.getString("sendMsgType").equalsIgnoreCase("VideoMsg"))) {
-                    json.put("sendMsgType", "XmlMsg");
-                    msg.append(((XmlMessage) m).getMsg());
-
                 }
             }
         });
