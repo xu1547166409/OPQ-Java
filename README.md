@@ -88,6 +88,10 @@ public class ExampleListener{
 }
 ```
 ---
+### 群聊示例
+![](https://ftp.bmp.ovh/imgs/2020/08/38902d27e4fb8905.png)
+### 私聊示例
+![](https://ftp.bmp.ovh/imgs/2020/08/f3f3068bea599ebb.jpg)
 
 ## 事件列表
 | 事件                   | 名称                 |         |
