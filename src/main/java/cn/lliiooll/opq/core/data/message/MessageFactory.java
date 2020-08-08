@@ -73,9 +73,9 @@ public class MessageFactory {
                 //LogManager.getLogger().info(msg);
                 return new RedBagMessage(JSON.parseObject(msg).getString("Content"), msgid, random, time, sender);
             case BigFaceMsg:
-                LogManager.getLogger().info(msg);
+                //LogManager.getLogger().info(msg);
             case TempSessionMsg:
-                LogManager.getLogger().info(msg);
+               // LogManager.getLogger().info(msg);
         }
         return new BaseMessage(msgid, random, time, sender);
     }

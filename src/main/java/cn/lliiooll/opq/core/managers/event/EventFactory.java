@@ -15,21 +15,22 @@ public class EventFactory {
         EventType type = EventType.valueOf(d.getString("EventName"));
         JSONObject eData = d.getJSONObject("EventData");
         JSONObject eMsg = d.getJSONObject("EventMsg");
+
         switch (type) {
             case ON_EVENT_GROUP_EXIT:
-                EventManager.invoke(new GroupMemberExitEvent(eData.getLong("UserID"), OPQGlobal.getGroup(eMsg.getLong("FromUin"))));
+                EventManager.invoke(new GroupMemberExitEvent(eData.getLongValue("UserID"), OPQGlobal.getGroup(eMsg.getLongValue("FromUin"))));
             case ON_EVENT_GROUP_JOIN:
-                long invite = eData.getLong("InviteUin");
-                Group g1 = OPQGlobal.getGroup(eMsg.getLong("FromUin"));
+                long invite = eData.getLongValue("InviteUin");
+                Group g1 = OPQGlobal.getGroup(eMsg.getLongValue("FromUin"));
                 if (invite == 0) {
                     EventManager.invoke(new GroupMemberJoinEvent(g1, g1.getMember(eData.getLongValue("UserID"))));
                 } else {
                     EventManager.invoke(new GroupMemberInviteEvent(invite, g1, g1.getMember(eData.getLongValue("UserID"))));
                 }
             case ON_EVENT_GROUP_SHUT:
-                EventManager.invoke(new GroupMuteEvent(eData.getLong("UserID"), eData.getLong("ShutTime"), OPQGlobal.getGroup(eData.getLong("GroupID"))));
+                EventManager.invoke(new GroupMuteEvent(eData.getLongValue("UserID"), eData.getLongValue("ShutTime"), OPQGlobal.getGroup(eData.getLongValue("GroupID"))));
             case ON_EVENT_GROUP_ADMIN:
-                EventManager.invoke(new GroupAdminEvent(eData.getLong("UserID"), OPQGlobal.getGroup(eData.getLong("GroupID")), eData.getIntValue("Flag") == 1));
+                EventManager.invoke(new GroupAdminEvent(eData.getLongValue("UserID"), OPQGlobal.getGroup(eData.getLongValue("GroupID")), eData.getIntValue("Flag") == 1));
             case ON_EVENT_FRIEND_ADD:
                 Group group = new Group();
                 group.setName(eData.getString("FromGroupName"));
@@ -57,5 +58,7 @@ public class EventFactory {
             case ON_EVENT_GROUP_EXIT_SUCC:// 主动退群成功
                 EventManager.invoke(new RobotQuitGroupEvent(eData.getLongValue("GroupID")));
         }
+
+
     }
 }
