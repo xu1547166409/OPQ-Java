@@ -3,10 +3,11 @@ package cn.lliiooll.opq.core;
 import cn.lliiooll.opq.core.data.group.GroupAnnounceType;
 import cn.lliiooll.opq.core.data.message.MessageChain;
 import cn.lliiooll.opq.core.data.message.data.*;
+import cn.lliiooll.opq.core.data.user.AddFriendFrom;
 import cn.lliiooll.opq.core.data.user.Member;
+import cn.lliiooll.opq.core.managers.event.Event;
 import cn.lliiooll.opq.core.managers.event.EventManager;
-import cn.lliiooll.opq.core.managers.event.data.FriendMessageSendEvent;
-import cn.lliiooll.opq.core.managers.event.data.GroupMessageSendEvent;
+import cn.lliiooll.opq.core.managers.event.data.*;
 import cn.lliiooll.opq.core.queue.IQueue;
 import cn.lliiooll.opq.core.queue.RequestBuilder;
 import cn.lliiooll.opq.core.data.group.Group;
@@ -604,13 +605,187 @@ public class OPQGlobal {
         json.put("toUser", group.getId());
         json.put("sendToType", 2);
         json.put("groupid", 0);
-        json.put("atUser", 0);
+        json.put("atUser", 1);
         json.put("sendMsgType", "TextMsg");
         json.put("content", "");
         IQueue.sendRequest(RequestBuilder.builder()
                 .setUrl(url)
                 .setRequest(json.toJSONString())
                 .setAction(c -> EventManager.invoke(new GroupMessageSendEvent(new AtMessage(new Long[]{0L}), group))).build());
+    }
+
+    /**
+     * at成员
+     */
+    public static void at(Member... member) {
+        JSONObject json = new JSONObject();
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=SendMsg&timeout=10";
+        json.put("toUser", member[0].getFromGroup().getId());
+        StringBuilder sb = new StringBuilder();
+        String s = "";
+        sb.append("[ATUSER(");
+        for (Member m : member) {
+            s = s + (Strings.isNullOrEmpty(s) ? m.getMemberUin() : "," + m.getMemberUin());
+        }
+        sb.append(")]");
+        json.put("sendToType", 2);
+        json.put("groupid", 0);
+        json.put("atUser", 0);
+        json.put("sendMsgType", "TextMsg");
+        json.put("content", sb.toString());
+        IQueue.sendRequest(RequestBuilder.builder()
+                .setUrl(url)
+                .setRequest(json.toJSONString())
+                .build());
+
+    }
+
+    /**
+     * 邀请一个人加入你所在的群
+     *
+     * @param group
+     * @param userIDs
+     */
+    public static void invite(Group group, long... userIDs) {
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=GroupMgr&timeout=10";
+        //{"ActionType":8,"GroupID":123456,"ActionUserID":987654,"Content":""}
+        for (long userID : userIDs) {
+            IQueue.sendRequest(
+                    RequestBuilder.builder()
+                            .setUrl(url)
+                            .setRequest(new JSONObject(new HashMap<String, Object>() {{
+                                put("ActionType", 8);
+                                put("GroupID", group.getId());
+                                put("ActionUserID", userID);
+                                put("Content", "");
+                            }}).toJSONString())
+                            .build()
+            );
+        }
+    }
+
+    /**
+     * 主动加入一个群
+     *
+     * @param groupIDs
+     * @param result   群问题回答
+     */
+    public static void joinGroup(String result, long... groupIDs) {
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=GroupMgr&timeout=10";
+        //{"ActionType":1,"GroupID":123456,"ActionUserID":0,"Content":"你好通过一下"}
+        for (long groupID : groupIDs) {
+            IQueue.sendRequest(
+                    RequestBuilder.builder()
+                            .setUrl(url)
+                            .setRequest(new JSONObject(new HashMap<String, Object>() {{
+                                put("ActionType", 1);
+                                put("GroupID", groupID);
+                                put("ActionUserID", 0);
+                                put("Content", result);
+                            }}).toJSONString())
+                            .build());
+        }
+    }
+
+    /**
+     * 主动退出群
+     *
+     * @param groupIDs
+     */
+    public static void quitGroup(long... groupIDs) {
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=GroupMgr&timeout=10";
+        //{"ActionType":2,"GroupID":123456,"ActionUserID":0,"Content":""}
+        for (long groupID : groupIDs) {
+            IQueue.sendRequest(
+                    RequestBuilder.builder()
+                            .setUrl(url)
+                            .setRequest(new JSONObject(new HashMap<String, Object>() {{
+                                put("ActionType", 2);
+                                put("GroupID", groupID);
+                                put("ActionUserID", 0);
+                                put("Content", "");
+                            }}).toJSONString())
+                            .build());
+        }
+    }
+
+    /**
+     * 将成员踢出群
+     *
+     * @param members
+     */
+    public static void kickMember(Member... members) {
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=GroupMgr&timeout=10";
+        for (Member member : members) {
+            //{"ActionType":3,"GroupID":123456,"ActionUserID":987654,"Content":""}
+            IQueue.sendRequest(
+                    RequestBuilder.builder()
+                            .setUrl(url)
+                            .setRequest(new JSONObject(new HashMap<String, Object>() {{
+                                put("ActionType", 3);
+                                put("GroupID", member.getFromGroup().getId());
+                                put("ActionUserID", member.getMemberUin());
+                                put("Content", "");
+                            }}).toJSONString())
+                            .build()
+            );
+            //EventManager.invoke(new GroupMemberKickEvent(OPQGlobal.qq, member.getMemberUin(), member.getFromGroup()));
+        }
+    }
+
+    /**
+     * 主动添加一个好友
+     *
+     * @param content 验证问题
+     * @param type    类型，具体看{@link AddFriendFrom}
+     * @param group   类型为 AddFriendFrom.GROUP时这项不能为空
+     * @param userIDs 要加的人
+     * @return 失败返回false
+     */
+    public static boolean addFriend(String content, AddFriendFrom type, Group group, long... userIDs) {
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=AddQQUser&timeout=10";
+        for (long userID : userIDs) {
+            if (type == AddFriendFrom.GROUP && (group == null || group == new Group())) {
+                return false;
+            }
+            IQueue.sendRequest(
+                    RequestBuilder.builder()
+                            .setUrl(url)
+                            .setRequest(new JSONObject(new HashMap<String, Object>() {{
+                                put("AddUserUid", 3);
+                                put("AddFromSource", type.getType());
+                                put("FromGroupID", type == AddFriendFrom.GROUP ? group.getId() : 0);
+                                put("Content", content);
+                            }}).toJSONString())
+                            .setAction(result -> EventManager.invoke(new RobotSendFriendRequestEvent(userID, content, type == AddFriendFrom.GROUP, group)))
+                            .build()
+            );
+
+        }
+        return true;
+    }
+
+    /**
+     * 向多个人点赞
+     *
+     * @param userIDs 要点赞的人
+     */
+    public static void like(long... userIDs) {
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=QQZan&timeout=10";
+        for (long userID : userIDs) {
+            //{\"Uid\":0,\"Fid\":0} fid 需要被赞的QQ Uid 触发动作的QQ号
+            IQueue.sendRequest(
+                    RequestBuilder.builder()
+                            .setUrl(url)
+                            .setRequest(new JSONObject(new HashMap<String, Object>() {{
+                                put("Uid", OPQGlobal.qq);
+                                put("Fid", userID);
+                            }}).toJSONString())
+                            .setAction(result -> EventManager.invoke(new RobotSendLikeEvent(userID)))
+                            .build()
+            );
+
+        }
     }
 
     /**

@@ -6,22 +6,16 @@ import cn.lliiooll.opq.core.managers.event.HandlerList;
 import lombok.Getter;
 
 /**
- * 群组退出
+ * 群组主动退出
  */
-public class GroupMemberKickEvent extends Event {
+public class RobotQuitGroupEvent extends Event {
     private static HandlerList handlers = new HandlerList();
 
     @Getter
     private final long id;
-    @Getter
-    private final long adminId;
-    @Getter
-    private final Group group;
 
-    public GroupMemberKickEvent(long adminId, long id, Group group) {
+    public RobotQuitGroupEvent(long id) {
         this.id = id;
-        this.adminId = adminId;
-        this.group = group;
     }
 
 

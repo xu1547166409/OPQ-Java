@@ -70,6 +70,7 @@ public class MessageFactory {
                 //LogManager.getLogger().info(msg);
                 return new FriendFileMessage(JSON.parseObject(msg), msgid, random, time, (Friend) sender);
             case RedBagMsg:
+                //LogManager.getLogger().info(msg);
                 return new RedBagMessage(JSON.parseObject(msg).getString("Content"), msgid, random, time, sender);
             case BigFaceMsg:
                 LogManager.getLogger().info(msg);

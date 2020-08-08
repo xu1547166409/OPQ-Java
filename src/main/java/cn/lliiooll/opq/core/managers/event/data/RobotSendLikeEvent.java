@@ -6,22 +6,16 @@ import cn.lliiooll.opq.core.managers.event.HandlerList;
 import lombok.Getter;
 
 /**
- * 群组退出
+ * 好友请求事件
  */
-public class GroupMemberKickEvent extends Event {
+public class RobotSendLikeEvent extends Event {
     private static HandlerList handlers = new HandlerList();
 
     @Getter
-    private final long id;
-    @Getter
-    private final long adminId;
-    @Getter
-    private final Group group;
+    public final long id;
 
-    public GroupMemberKickEvent(long adminId, long id, Group group) {
+    public RobotSendLikeEvent(long id) {
         this.id = id;
-        this.adminId = adminId;
-        this.group = group;
     }
 
 

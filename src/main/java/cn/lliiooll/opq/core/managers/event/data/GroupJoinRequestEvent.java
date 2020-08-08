@@ -7,32 +7,25 @@ import cn.lliiooll.opq.core.managers.event.HandlerList;
 import cn.lliiooll.opq.core.queue.IQueue;
 import cn.lliiooll.opq.core.queue.RequestBuilder;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPObject;
 import lombok.Getter;
 
 /**
  * 好友请求事件
  */
-public class FriendRequestEvent extends Event {
+public class GroupJoinRequestEvent extends Event {
     private static HandlerList handlers = new HandlerList();
 
     @Getter
     public final long id;
     @Getter
-    public final String question;
-    @Getter
-    public final boolean isFromGroup;
-    @Getter
-    public final Group fromGroup;
+    public final long groupId;
     @Getter
     public final JSONObject source;
 
 
-    public FriendRequestEvent(long id, String question, boolean isFromGroup, Group fromGroup, JSONObject source) {
+    public GroupJoinRequestEvent(long id, long groupId, JSONObject source) {
         this.id = id;
-        this.question = question;
-        this.isFromGroup = isFromGroup;
-        this.fromGroup = fromGroup;
+        this.groupId = groupId;
         this.source = source;
     }
 
@@ -40,12 +33,12 @@ public class FriendRequestEvent extends Event {
      * 接受请求
      */
     public void accept() {
-        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=DealFriend&timeout=10";
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=AnswerInviteGroup&timeout=10";
         JSONObject j = source;
         JSONObject cu = j.getJSONObject("CurrentPacket");
         JSONObject data = j.getJSONObject("Data");
         JSONObject eData = j.getJSONObject("EventData");
-        eData.put("Action", 2);
+        eData.put("Action", 11);
         data.put("EventData", eData);
         cu.put("Data", data);
         j.put("CurrentPacket", cu);
@@ -61,12 +54,12 @@ public class FriendRequestEvent extends Event {
      * 忽略请求
      */
     public void pass() {
-        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=DealFriend&timeout=10";
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=AnswerInviteGroup&timeout=10";
         JSONObject j = source;
         JSONObject cu = j.getJSONObject("CurrentPacket");
         JSONObject data = j.getJSONObject("Data");
         JSONObject eData = j.getJSONObject("EventData");
-        eData.put("Action", 1);
+        eData.put("Action", 14);
         data.put("EventData", eData);
         cu.put("Data", data);
         j.put("CurrentPacket", cu);
@@ -82,12 +75,12 @@ public class FriendRequestEvent extends Event {
      * 拒绝请求
      */
     public void refuse() {
-        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=DealFriend&timeout=10";
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=AnswerInviteGroup&timeout=10";
         JSONObject j = source;
         JSONObject cu = j.getJSONObject("CurrentPacket");
         JSONObject data = j.getJSONObject("Data");
         JSONObject eData = j.getJSONObject("EventData");
-        eData.put("Action", 3);
+        eData.put("Action", 21);
         data.put("EventData", eData);
         cu.put("Data", data);
         j.put("CurrentPacket", cu);
