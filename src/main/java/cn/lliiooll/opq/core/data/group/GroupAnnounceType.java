@@ -7,6 +7,9 @@ public enum GroupAnnounceType {
      * 弹窗公告
      */
     POPUP(10),
+    /**
+     * 发给新成员
+     */
     SENDNEW(20);
 
     @Getter

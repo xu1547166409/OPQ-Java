@@ -573,7 +573,7 @@ public class OPQGlobal {
      * @param title  标题
      * @param body   内容
      * @param pinned 是否顶置
-     * @param type   类型
+     * @param type   类型{@link GroupAnnounceType}
      */
     public static void sendGroupAnnounce(Group group,
                                          String title,
@@ -727,9 +727,10 @@ public class OPQGlobal {
                                 put("ActionUserID", member.getMemberUin());
                                 put("Content", "");
                             }}).toJSONString())
+                            .setAction(result -> EventManager.invoke(new GroupMemberKickEvent(OPQGlobal.qq, member.getMemberUin(), member.getFromGroup())))
                             .build()
             );
-            //EventManager.invoke(new GroupMemberKickEvent(OPQGlobal.qq, member.getMemberUin(), member.getFromGroup()));
+
         }
     }
 
