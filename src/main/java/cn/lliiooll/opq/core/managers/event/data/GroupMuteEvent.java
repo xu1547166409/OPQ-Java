@@ -14,17 +14,14 @@ public class GroupMuteEvent extends Event {
     @Getter
     private final long id;
     @Getter
-    private final long inviteId;
+    private final long time;
     @Getter
     private final Group group;
-    @Getter
-    private final String name;
 
-    public GroupMuteEvent(long inviteId, long id, Group group, String name) {
+    public GroupMuteEvent(long id, long time, Group group) {
         this.id = id;
-        this.inviteId = inviteId;
+        this.time = time;
         this.group = group;
-        this.name = name;
     }
 
 

@@ -14,17 +14,11 @@ public class GroupMemberExitEvent extends Event {
     @Getter
     private final long id;
     @Getter
-    private final long inviteId;
-    @Getter
     private final Group group;
-    @Getter
-    private final String name;
 
-    public GroupMemberExitEvent(long inviteId, long id, Group group, String name) {
+    public GroupMemberExitEvent(long id, Group group) {
         this.id = id;
-        this.inviteId = inviteId;
         this.group = group;
-        this.name = name;
     }
 
 

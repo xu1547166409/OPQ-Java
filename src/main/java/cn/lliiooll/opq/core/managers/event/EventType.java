@@ -8,10 +8,6 @@ public enum EventType {
     /**
      * 好友请求
      */
-    ON_EVENT_FRIEND_ADDED,
-    /**
-     * 好友请求
-     */
     ON_EVENT_FRIEND_ADD,
     /**
      * 主动退群

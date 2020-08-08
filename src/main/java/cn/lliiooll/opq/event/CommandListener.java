@@ -15,7 +15,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class CommandListener {
 
-    @EventHandler(order = -1)
+    @EventHandler(order = -100)
     public void onGroup(GroupMessageEvent event) {
         if (event.getMessage().messageToString().startsWith(OPQMain.command)) {
             LogManager.getLogger().info("触发群指令");
@@ -23,7 +23,7 @@ public class CommandListener {
         }
     }
 
-    @EventHandler(order = -1)
+    @EventHandler(order = -100)
     public void onPrivate(FriendMessageEvent event) {
         if (event.getMessage().messageToString().startsWith(OPQMain.command)) {
             LogManager.getLogger().info("触发私聊指令");

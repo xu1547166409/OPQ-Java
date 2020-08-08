@@ -30,25 +30,18 @@ public class MessageFactory {
                 long groupId = data.getLongValue("FromGroupId");
                 //long time = data.getLongValue("MsgTime");
                 long random = data.getLongValue("MsgRandom");
-                Group group = new Group();
-                group.setId(groupId);
-                group.setName(groupName);
-                Member member = new Member();
-                member.setFromGroup(group);
-                member.setId(senderId);
-                member.setName(senderName);
+                Group group = OPQGlobal.getGroup(groupId);
+                Member member = group.getMember(senderId);
                 BaseMessage message = executeMessage(msgid, random, msg, time, member, messageType);
                 EventManager.invoke(new GroupMessageEvent(message, group, member));
             }
         } else if (type == MessageFrom.FRIEND) {
             long senderId = data.getLongValue("FromUin");
             if (senderId != OPQGlobal.getQq()) {
-                Friend friend = new Friend();
-                friend.setId(senderId);
+                Friend friend = OPQGlobal.getFriend(senderId);
                 BaseMessage message = executeMessage(msgid, 0, msg, time, friend, messageType);
                 EventManager.invoke(new FriendMessageEvent(message, friend));
             }
-            //long getterId = data.getLongValue("ToUin");
         }
     }
 
@@ -59,14 +52,14 @@ public class MessageFactory {
             case VoiceMsg:
                 return new VoiceMessage(JSON.parseObject(msg), msgid, random, time, sender);
             case JsonMsg:
-                return new XmlMessage(JSON.parseObject(JSON.parseObject(msg).getString("Content")).getString("Content"), msgid, random, time, sender);
+                return new XmlMessage(JSON.parseObject(msg).getString("Content"), msgid, random, time, sender);
             case PicMsg:
                 return new PicMessage(JSON.parseObject(msg), msgid, random, time, sender);
             case AtMsg:
                 JSONObject data = JSON.parseObject(msg);
                 return new AtMessage(data.getJSONArray("UserID"), data.getString("Content"), msgid, random, time, sender);
             case XmlMsg:
-                return new JsonMessage(msg, msgid, random);
+                return new JsonMessage(JSON.parseObject(msg).getString("Content"), msgid, random);
             case ReplayMsg:
                 return new ReplayMessage(JSON.parseObject(msg), msgid, random, time, sender);
             case VideoMsg:

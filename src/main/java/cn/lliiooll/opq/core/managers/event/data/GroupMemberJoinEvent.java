@@ -1,6 +1,7 @@
 package cn.lliiooll.opq.core.managers.event.data;
 
 import cn.lliiooll.opq.core.data.group.Group;
+import cn.lliiooll.opq.core.data.user.Member;
 import cn.lliiooll.opq.core.managers.event.Event;
 import cn.lliiooll.opq.core.managers.event.HandlerList;
 import lombok.Getter;
@@ -10,21 +11,14 @@ import lombok.Getter;
  */
 public class GroupMemberJoinEvent extends Event {
     private static HandlerList handlers = new HandlerList();
-
-    @Getter
-    private final long id;
-    @Getter
-    private final long inviteId;
     @Getter
     private final Group group;
     @Getter
-    private final String name;
+    private final Member member;
 
-    public GroupMemberJoinEvent(long inviteId, long id, Group group, String name) {
-        this.id = id;
-        this.inviteId = inviteId;
+    public GroupMemberJoinEvent(Group group, Member member) {
         this.group = group;
-        this.name = name;
+        this.member = member;
     }
 
 

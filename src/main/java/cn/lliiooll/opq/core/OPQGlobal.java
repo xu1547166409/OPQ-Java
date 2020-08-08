@@ -11,12 +11,17 @@ import cn.lliiooll.opq.core.queue.IQueue;
 import cn.lliiooll.opq.core.queue.RequestBuilder;
 import cn.lliiooll.opq.core.data.group.Group;
 import cn.lliiooll.opq.core.data.user.Friend;
+import cn.lliiooll.opq.utils.IData;
 import cn.lliiooll.opq.utils.TaskUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -25,21 +30,23 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OPQGlobal {
     @Getter
     public static long qq;
 
-    private static String url;
+    @Getter
+    public static String url;
     private static Logger log = LogManager.getLogger();
     @Getter
     public static Map<Long, Friend> friends = Maps.newHashMap();
     @Getter
     public static Map<Long, Group> groups = Maps.newHashMap();
+    @Getter
+    public static Map<Group, List<Member>> members = Maps.newHashMap();
 
     private static ExecutorService main = TaskUtils.create("DownloadTask-%d");
 
@@ -50,7 +57,7 @@ public class OPQGlobal {
         refreshGroupList();
     }
 
-    private static void refreshGroupList() {
+    public static void refreshGroupList() {
         IQueue.sendRequest(RequestBuilder.builder()
                 .setRequest(new JSONObject(new HashMap<String, Object>() {{
                     put("NextToken", "");
@@ -70,7 +77,70 @@ public class OPQGlobal {
                 }).build());
     }
 
-    private static void refreshFriendList() {
+    public static List<Member> getMemberList(Group group) {
+        return members.containsKey(group) ? (members.get(group).isEmpty() ? refreshMemberList(group) : members.get(group)) : refreshMemberList(group);
+    }
+
+    public static List<Member> refreshMemberList(Group group) {
+        long time = System.currentTimeMillis();
+        long count = 0;
+        List<Member> m = Lists.newArrayList();
+        if (members.containsKey(group)) {
+            m = members.get(group);
+        }
+        JSONArray ms = getMemberResults(0, group);
+        for (Iterator<Object> it = ms.iterator(); it.hasNext(); ) {
+            JSONObject ja = (JSONObject) it.next();
+            Member member = new Member();
+            member.setFromGroup(group.getId());
+            Member c = new Gson().fromJson(ja.toJSONString(), member.getClass());
+            if (m.contains(c)) continue;
+            m.add(c);
+            count++;
+        }
+        members.put(group, m);
+        LogManager.getLogger().info("群员获取完毕, 总计 " + count + " 个, 耗时 " + (System.currentTimeMillis() - time) + "ms");
+        return m;
+    }
+
+    @SneakyThrows
+    private static JSONArray getMemberResults(long i, Group group) {
+        JSONArray array = new JSONArray();
+        String url = "http://" + OPQGlobal.url + "/v1/LuaApiCaller?qq=" + OPQGlobal.qq + "&funcname=GetGroupUserList&timeout=10";
+        IData<Boolean> c = new IData<>(false);
+        List<JSONArray> jas = Lists.newArrayList();
+        IData<JSONObject> js = new IData<>(new JSONObject());
+        IQueue.sendRequest(
+                RequestBuilder.builder()
+                        .setUrl(url)
+                        .setRequest(new JSONObject(new HashMap<String, Object>() {{
+                            put("GroupUin", group.getId());
+                            put("LastUin", i);
+                        }}).toJSONString())
+                        .setAction(result -> {
+                            js.setData(JSONObject.parseObject(result));
+                            c.setData(true);
+                        }).build()
+        );
+        int cou = 0;
+        while (!c.getData()) {
+            if (cou > 10) {// 给10秒的网络延迟
+                break;
+            }
+            Thread.sleep(1000);
+            cou++;
+        }
+        JSONObject j = js.getData();
+        if (j.getLongValue("LastUin") != 0) {
+            JSONArray ja = getMemberResults(j.getLong("LastUin"), group);
+            array.addAll(ja);
+        }
+        array.addAll(j.getJSONArray("MemberList"));
+        return array;
+    }
+
+
+    public static void refreshFriendList() {
         IQueue.sendRequest(RequestBuilder.builder()
                 .setRequest(new JSONObject(new HashMap<String, Object>() {{
                     put("StartIndex", 0);
@@ -434,7 +504,7 @@ public class OPQGlobal {
                 .setUrl(url)
                 .setRequest(new JSONObject(new HashMap<String, Object>() {{
                     put("GroupID", group.getId());
-                    put("ShutUpUserID", member.getId());
+                    put("ShutUpUserID", member.getMemberUin());
                     put("ShutTim", set);
                 }}).toJSONString())
                 .setAction(m -> {
@@ -603,7 +673,7 @@ public class OPQGlobal {
         json.put("replayInfo", new JSONObject(new HashMap<String, Object>() {{
             put("MsgSeq", message.getMsgid());
             put("MsgTime", message.getTime());
-            put("UserID", message.getSender() instanceof Member ? ((Member) message.getSender()).getId() : ((Friend) message.getSender()).getId());
+            put("UserID", message.getSender() instanceof Member ? ((Member) message.getSender()).getMemberUin() : ((Friend) message.getSender()).getId());
             put("RawContent", message.messageToString());
         }}));
         IQueue.sendRequest(RequestBuilder.builder()

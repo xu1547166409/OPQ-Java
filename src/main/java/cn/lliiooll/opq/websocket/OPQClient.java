@@ -60,6 +60,7 @@ public class OPQClient extends WebSocketClient {
                 } else if ("OnFriendMsgs".equals(string)) {// 好友消息
                     MessageFactory.execute(data, MessageFrom.FRIEND);
                 } else if ("OnEvents".equals(string)) {// 事件
+                    // log.info(data);
                     EventFactory.execute(JSONObject.parseObject(data));
                 } else if ("OnCheckLoginQrcode".equals(string)) {// 扫码成功
                     EventManager.invoke(new CheckLoginQrcodeEvent());

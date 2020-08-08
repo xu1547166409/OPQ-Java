@@ -11,20 +11,27 @@ import lombok.Getter;
 public class GroupAdminEvent extends Event {
     private static HandlerList handlers = new HandlerList();
 
+    /**
+     * 被操作id
+     */
     @Getter
     private final long id;
-    @Getter
-    private final long inviteId;
+    /***
+     *  群
+     */
     @Getter
     private final Group group;
+    /**
+     * true为升管理
+     * flase为取消
+     */
     @Getter
-    private final String name;
+    private final boolean up;
 
-    public GroupAdminEvent(long inviteId, long id, Group group, String name) {
+    public GroupAdminEvent(long id, Group group, boolean up) {
         this.id = id;
-        this.inviteId = inviteId;
         this.group = group;
-        this.name = name;
+        this.up = up;
     }
 
 

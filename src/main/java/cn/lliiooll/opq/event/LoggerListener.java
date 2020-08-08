@@ -6,30 +6,36 @@ import cn.lliiooll.opq.core.managers.event.data.FriendMessageEvent;
 import cn.lliiooll.opq.core.managers.event.data.FriendMessageSendEvent;
 import cn.lliiooll.opq.core.managers.event.data.GroupMessageEvent;
 import cn.lliiooll.opq.core.managers.event.data.GroupMessageSendEvent;
+import cn.lliiooll.opq.utils.TaskUtils;
 import org.apache.logging.log4j.LogManager;
 
+import java.util.concurrent.ExecutorService;
+
 public class LoggerListener {
+    private static ExecutorService main = TaskUtils.create("LoggerTask-%d");
 
     @EventHandler
     public void onGroup(GroupMessageEvent event) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(OPQGlobal.getQq())
-                .append(" <- 群: ")
-                .append(event.getGroup().getName())
-                .append("（")
-                .append(event.getGroup().getId())
-                .append("）")
-                .append(" 发送者: ")
-                .append(event.getSender().getName())
-                .append("（")
-                .append(event.getSender().getId())
-                .append("）")
-                .append(" 消息：")
-                .append(event.getMessage().messageToString()
-                        .replace("\n", "")
-                        .replace("\r", "")
-                        .replace("\t", ""));
-        LogManager.getLogger().info(sb.toString());
+        main.execute(() -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append(OPQGlobal.getQq())
+                    .append(" <- 群: ")
+                    .append(event.getGroup().getName())
+                    .append("（")
+                    .append(event.getGroup().getId())
+                    .append("）")
+                    .append(" 发送者: ")
+                    .append(event.getSender().getGroupCard())
+                    .append("（")
+                    .append(event.getSender().getMemberUin())
+                    .append("）")
+                    .append(" 消息：")
+                    .append(event.getMessage().messageToString()
+                            .replace("\n", "")
+                            .replace("\r", "")
+                            .replace("\t", ""));
+            LogManager.getLogger().info(sb.toString());
+        });
     }
 
     @EventHandler

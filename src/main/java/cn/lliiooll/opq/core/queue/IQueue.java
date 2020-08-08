@@ -20,7 +20,7 @@ public class IQueue {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);// 消息队列为空等待一秒处理
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {
@@ -28,11 +28,11 @@ public class IQueue {
                         IRequest request = queue.poll();
                         if (request != null) {
                             try {
-
+                                /*
                                 LogManager.getLogger().info("==============================");
                                 LogManager.getLogger().info(request.getRequest());
                                 LogManager.getLogger().info("==============================");
-
+                                */
                                 String reslut = new OkHttpClient.Builder()
                                         .build()
                                         .newCall(new Request.Builder()
@@ -43,11 +43,11 @@ public class IQueue {
                                         .body()
                                         .string();
                                 main.execute(() -> {
-
+                                    /*
                                     LogManager.getLogger().info("++++++++++++++++++++++++++++++");
                                     LogManager.getLogger().info(reslut);
                                     LogManager.getLogger().info("++++++++++++++++++++++++++++++");
-
+                                     */
                                     request.getAction().onFinisher(
                                             Strings.isNullOrEmpty(reslut) ? reslut : reslut
                                                     .replace("\n", "")
@@ -60,7 +60,7 @@ public class IQueue {
                             }
                         }
                         try {
-                            Thread.sleep(1500);
+                            Thread.sleep(1000);// 保险起见1秒发一条
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

@@ -13,17 +13,23 @@ import java.util.Collections;
 @Data
 public class AtMessage extends BaseMessage {
 
-    public final Long[] id;
+    public Long[] id;
     public String content = "[AT]";
 
     public AtMessage(JSONArray id) {
         super(0, 0, System.currentTimeMillis(), new Friend(OPQGlobal.getQq()));
-        this.id = id.toArray(new Long[0]);
+        if (!id.isEmpty() && (id.get(0) instanceof Long)) {
+            this.id = id.toArray(new Long[0]);
+        }
+        this.id = new Long[0];
     }
 
     public AtMessage(JSONArray id, String content, long msgid, long random, long time, User sender) {
         super(msgid, random, time, sender);
-        this.id = id.toArray(new Long[0]);
+        if (!id.isEmpty() && (id.get(0) instanceof Long)) {
+            this.id = id.toArray(new Long[0]);
+        }
+        this.id = new Long[0];
         this.content = content;
     }
 

@@ -1,9 +1,12 @@
 package cn.lliiooll.opq.core.managers.event;
 
+import cn.lliiooll.opq.core.OPQ;
+import cn.lliiooll.opq.core.OPQGlobal;
 import cn.lliiooll.opq.core.data.group.Group;
 import cn.lliiooll.opq.core.data.user.Friend;
 import cn.lliiooll.opq.core.managers.event.data.*;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.logging.log4j.LogManager;
 
 public class EventFactory {
     public static void execute(JSONObject data) {
@@ -13,14 +16,20 @@ public class EventFactory {
         JSONObject eMsg = d.getJSONObject("EventMsg");
         switch (type) {
             case ON_EVENT_GROUP_EXIT:
+                EventManager.invoke(new GroupMemberExitEvent(eData.getLong("UserID"), OPQGlobal.getGroup(eMsg.getLong("FromUin"))));
             case ON_EVENT_GROUP_JOIN:
-                Group g1 = new Group();
-                g1.setName("");
-                g1.setId(eMsg.getLongValue("FromUin"));
-                EventManager.invoke(new GroupMemberInviteEvent(eData.getLongValue("InviteUin"), eData.getLongValue("UserID"), g1, eData.getString("UserName")));
+                long invite = eData.getLong("InviteUin");
+                Group g1 = OPQGlobal.getGroup(eMsg.getLong("FromUin"));
+                if (invite == 0) {
+                    EventManager.invoke(new GroupMemberJoinEvent(g1, g1.getMember(eData.getLongValue("UserID"))));
+                } else {
+                    EventManager.invoke(new GroupMemberInviteEvent(invite, g1, g1.getMember(eData.getLongValue("UserID"))));
+                }
             case ON_EVENT_GROUP_SHUT:
+                EventManager.invoke(new GroupMuteEvent(eData.getLong("UserID"), eData.getLong("ShutTime"), OPQGlobal.getGroup(eData.getLong("GroupID"))));
             case ON_EVENT_GROUP_ADMIN:
-            case ON_EVENT_FRIEND_ADDED:
+                EventManager.invoke(new GroupAdminEvent(eData.getLong("UserID"), OPQGlobal.getGroup(eData.getLong("GroupID")), eData.getIntValue("Flag") == 1));
+            case ON_EVENT_FRIEND_ADD:
                 Group group = new Group();
                 group.setName(eData.getString("FromGroupName"));
                 group.setId(eData.getLongValue("FromGroupId"));
@@ -34,14 +43,11 @@ public class EventFactory {
                 EventManager.invoke(new FriendDeleteEvent(eData.getLongValue("UserID")));
             case ON_EVENT_FRIEND_REVOKE:
                 EventManager.invoke(new FriendRecallEvent(eData.getLongValue("UserID"), eData.getLongValue("MsgSeq")));
-            case ON_EVENT_GROUP_EXIT_SUCC:
-            case ON_EVENT_GROUP_JOIN_SUCC:
             case ON_EVENT_NOTIFY_PUSHADDFRD:
                 Friend friend = new Friend();
                 friend.setId(eData.getLongValue("UserID"));
                 friend.setNick(eData.getString("NickName"));
                 EventManager.invoke(new FriendAddedEvent(friend));
-            case ON_EVENT_FRIEND_ADD:
             case ON_EVENT_GROUP_ADMINSYSNOTIFY:
         }
     }
