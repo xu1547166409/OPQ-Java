@@ -11,6 +11,7 @@ import cn.lliiooll.opq.core.managers.cmd.CommandExecutor;
 import cn.lliiooll.opq.core.managers.cmd.CommandManager;
 import cn.lliiooll.opq.core.managers.cmd.CommandResult;
 import cn.lliiooll.opq.core.managers.cmd.annotations.Command;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -19,7 +20,6 @@ import java.util.Set;
 public class CmdListCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandResult result) {
-
         StringBuilder msg = new StringBuilder();
         if (result.getArgs().size() < 1) {
             Set<Class<?>> executors = CommandManager.usages.keySet();
@@ -53,9 +53,9 @@ public class CmdListCommand implements CommandExecutor {
             }
         }
         if (result.type == MessageFrom.GROUP)
-            OPQGlobal.sendGroupMessage(MessageChain.newCall(new TextMessage("未知的指令.请使用 " + OPQMain.command + "cmdlist 来获得指令列表")), result.group);
+            result.getGroup().sendMessage(MessageChain.newCall(msg.toString()));
         else
-            OPQGlobal.sendFriendMessage(MessageChain.newCall(new TextMessage("未知的指令.请使用 " + OPQMain.command + "cmdlist 来获得指令列表")), (Friend) result.sender);
+            ((Friend) result.getSender()).sendMessage(MessageChain.newCall(msg.toString()));
         return true;
     }
 }

@@ -1,5 +1,7 @@
 package cn.lliiooll.opq.core.data.message.data;
 
+import cn.lliiooll.opq.core.OPQGlobal;
+import cn.lliiooll.opq.core.data.message.MessageChain;
 import cn.lliiooll.opq.core.data.user.User;
 import lombok.Data;
 
@@ -19,6 +21,10 @@ public class BaseMessage implements Message {
 
     public BaseMessage() {
 
+    }
+
+    public void reply(MessageChain messageChain) {
+        OPQGlobal.reply(this, messageChain);
     }
 
     @Override

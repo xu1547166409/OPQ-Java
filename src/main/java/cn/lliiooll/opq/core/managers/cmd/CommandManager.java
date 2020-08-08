@@ -77,11 +77,14 @@ public class CommandManager {
         if (sourceCmd.length > 0) {// 保证不为空
             String label = sourceCmd[0];
             boolean q = has(label);
+
             LogManager.getLogger().info("====================");
             LogManager.getLogger().info(q);
             LogManager.getLogger().info(label);
             LogManager.getLogger().info(executors.keySet());
             LogManager.getLogger().info("====================");
+
+
             if (q) {
                 String[] args = new String[sourceCmd.length - 1];
                 System.arraycopy(sourceCmd, 1, args, 0, sourceCmd.length - 1);
@@ -99,10 +102,10 @@ public class CommandManager {
                         OPQGlobal.sendFriendMessage(MessageChain.newCall(new TextMessage("指令执行失败。用法：" + usages.get(executor))), (Friend) sender);
                 }
             } else {
-                if (type == MessageFrom.GROUP)
+                if (type == MessageFrom.GROUP) {
                     group.sendMessage(MessageChain.newCall(new TextMessage("未知的指令.请使用 " + OPQMain.command + "cmdlist 来获得指令列表")));
-                else
-                    OPQGlobal.sendFriendMessage(MessageChain.newCall(new TextMessage("未知的指令.请使用 " + OPQMain.command + "cmdlist 来获得指令列表")), (Friend) sender);
+                } else
+                    ((Friend) sender).sendMessage(MessageChain.newCall(new TextMessage("未知的指令.请使用 " + OPQMain.command + "cmdlist 来获得指令列表")));
             }
         }
     }
